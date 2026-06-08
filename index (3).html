@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Reciprocity Farm Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     EDIT YOUR PAYMENT LINK HERE
+     Replace the URL below with your real Square payment link
+     once your Square account is set up.
+     ============================================================ */
+  /* PAYMENT_LINK is set in the script at the bottom of this file */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --cream: #f5f0e4;
+    --cream-deep: #ebe3d2;
+    --ink: #2b2417;
+    --ink-soft: #6b5d44;
+    --moss: #5a7a4f;
+    --moss-deep: #43603a;
+    --clay: #b5683a;
+    --gold: #c89a3c;
+    --paper: #fdfbf5;
+    --line: #ddd2b8;
+  }
+
+  html, body {
+    font-family: 'Karla', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  #app { min-height: 100vh; max-width: 520px; margin: 0 auto; position: relative; }
+
+  .screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    animation: fade 0.4s ease;
+  }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91,122,79,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    pointer-events: none; z-index: 0;
+  }
+  #app > * { position: relative; z-index: 1; }
+
+  /* ===== LANGUAGE SCREEN ===== */
+  .lang-screen { justify-content: center; align-items: center; padding: 2.5rem 1.5rem; gap: 2.5rem; text-align: center; }
+  .logo-mark { font-size: 4rem; line-height: 1; animation: sway 5s ease-in-out infinite; transform-origin: bottom center; }
+  @keyframes sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  .logo-title { font-family: 'Fraunces', serif; font-size: 2.6rem; font-weight: 600; line-height: 1.05; margin-top: 0.6rem; letter-spacing: -0.02em; }
+  .logo-sub { font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); margin-top: 0.5rem; font-weight: 500; }
+  .lang-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+  .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; width: 100%; max-width: 380px; }
+  .lang-btn {
+    background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px;
+    padding: 1.1rem 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.65rem;
+    font-family: 'Karla', sans-serif; font-size: 1rem; font-weight: 500; color: var(--ink);
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 6px rgba(43,36,23,0.05);
+  }
+  .lang-btn:active { transform: scale(0.97); }
+  .lang-btn:hover { border-color: var(--moss); box-shadow: 0 6px 16px rgba(91,122,79,0.16); }
+  .lang-flag { font-size: 1.5rem; }
+
+  /* ===== HEADER (shared) ===== */
+  .top-bar { display: flex; align-items: center; gap: 0.5rem; padding: 1.1rem 1.25rem 0.5rem; }
+  .back-btn { background: none; border: none; font-family: 'Karla'; font-size: 0.9rem; color: var(--ink-soft); cursor: pointer; padding: 0.4rem 0; font-weight: 500; }
+  .back-btn:active { opacity: 0.6; }
+
+  /* ===== TIER SCREEN ===== */
+  .tier-screen { padding: 0 1.25rem 2rem; }
+  .heading { font-family: 'Fraunces', serif; font-size: 1.85rem; font-weight: 600; line-height: 1.12; letter-spacing: -0.015em; }
+  .subhead { font-size: 0.92rem; color: var(--ink-soft); line-height: 1.5; margin-top: 0.5rem; margin-bottom: 1.4rem; }
+  .tier-list { display: flex; flex-direction: column; gap: 0.8rem; }
+  .tier-card {
+    background: var(--paper); border: 2px solid var(--line); border-radius: 16px;
+    padding: 1.1rem 1.2rem 1.2rem; cursor: pointer; position: relative; overflow: hidden;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .tier-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc); }
+  .tier-card:active { transform: scale(0.985); }
+  .tier-card:hover { border-color: var(--tc); box-shadow: 0 8px 22px rgba(43,36,23,0.1); }
+  .tier-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.3rem; }
+  .tier-emoji { font-size: 1.4rem; }
+  .tier-name { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 600; color: var(--tc); }
+  .tier-income { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.02em; margin-bottom: 0.45rem; }
+  .income-label { font-weight: 700; color: var(--ink); opacity: 0.55; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.06em; }
+  .tier-desc { font-size: 0.88rem; line-height: 1.5; color: var(--ink); opacity: 0.85; }
+  .tier-go { margin-top: 0.95rem; width: 100%; padding: 0.7rem; background: var(--tc); color: #fff; border: none; border-radius: 10px; font-family: 'Karla'; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.03em; cursor: pointer; transition: opacity 0.15s; }
+  .tier-go:active { opacity: 0.85; }
+  .honor-box { margin-top: 1.3rem; background: rgba(91,122,79,0.09); border: 1px solid rgba(91,122,79,0.22); border-radius: 12px; padding: 0.9rem 1.1rem; font-size: 0.85rem; color: var(--moss-deep); text-align: center; line-height: 1.5; font-style: italic; }
+  .fine-note { text-align: center; font-size: 0.72rem; color: var(--ink-soft); opacity: 0.7; margin-top: 0.8rem; }
+  .learn-link { display: block; text-align: center; font-size: 0.85rem; color: var(--moss-deep); font-weight: 700; margin-top: 1.3rem; text-decoration: none; padding: 0.6rem; border-bottom: 1px solid transparent; transition: opacity 0.15s; }
+  .learn-link:active { opacity: 0.6; }
+  .learn-link:hover { text-decoration: underline; }
+
+  /* ===== SHOP SCREEN ===== */
+  .shop-head { position: sticky; top: 0; z-index: 10; background: var(--cream); padding: 1rem 1.25rem 0.85rem; border-bottom: 1px solid var(--line); }
+  .shop-head-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+  .shop-title { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.015em; }
+  .tier-pill { display: inline-flex; align-items: center; gap: 0.35rem; background: var(--tcbg); color: var(--tc); border: 1.5px solid var(--tc); border-radius: 22px; padding: 0.35rem 0.8rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; padding: 1rem 1.25rem; }
+  .card {
+    background: var(--paper); border: 1.5px solid var(--line); border-radius: 16px;
+    padding: 1rem 0.8rem 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    box-shadow: 0 2px 6px rgba(43,36,23,0.05); transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .card:hover { border-color: var(--moss); box-shadow: 0 7px 16px rgba(43,36,23,0.1); }
+  .card-emoji { font-size: 2.5rem; line-height: 1; }
+  .card-photo { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 2px solid var(--line); display: block; }
+  .card-name { font-family: 'Fraunces', serif; font-size: 0.95rem; font-weight: 600; text-align: center; line-height: 1.15; }
+  .card-unit { font-size: 0.7rem; color: var(--ink-soft); }
+  .card-price { font-size: 1.15rem; font-weight: 700; color: var(--moss-deep); margin-top: 0.1rem; }
+  .add-btn { margin-top: 0.35rem; padding: 0.45rem 1.3rem; background: var(--moss); color: #fff; border: none; border-radius: 9px; font-family: 'Karla'; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.03em; cursor: pointer; transition: background 0.15s; }
+  .add-btn:active { background: var(--moss-deep); }
+  .stepper { display: flex; align-items: center; gap: 0.65rem; margin-top: 0.3rem; }
+  .step-btn { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); font-size: 1.1rem; line-height: 1; cursor: pointer; color: var(--moss-deep); font-weight: 700; display: flex; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s, border-color 0.12s; }
+  .step-btn:active { background: var(--moss); color: #fff; border-color: var(--moss); }
+  .step-qty { font-size: 1rem; font-weight: 700; min-width: 1.3rem; text-align: center; }
+
+  /* ===== CART BAR ===== */
+  .cart-bar { position: sticky; bottom: 0; z-index: 20; background: var(--ink); color: var(--paper); padding: 1rem 1.4rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 -6px 22px rgba(43,36,23,0.22); transition: background 0.15s; }
+  .cart-bar:active { background: #3b3322; }
+  .cart-left { display: flex; align-items: center; gap: 0.7rem; }
+  .cart-count { background: var(--moss); border-radius: 22px; padding: 0.18rem 0.62rem; font-size: 0.82rem; font-weight: 700; }
+  .cart-word { font-size: 0.92rem; font-weight: 700; letter-spacing: 0.03em; }
+  .cart-total { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; }
+
+  /* ===== CHECKOUT ===== */
+  .checkout-screen { padding: 0 1.25rem 2rem; }
+  .cart-items { background: var(--paper); border: 1.5px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 1.1rem; }
+  .citem { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; border-bottom: 1px solid var(--cream-deep); }
+  .citem:last-child { border-bottom: none; }
+  .citem-left { display: flex; align-items: center; gap: 0.65rem; }
+  .citem-emoji { font-size: 1.45rem; }
+  .citem-photo { width: 34px; height: 34px; object-fit: cover; border-radius: 50%; display: block; }
+  .citem-name { font-weight: 700; font-size: 0.92rem; }
+  .citem-meta { font-size: 0.74rem; color: var(--ink-soft); margin-top: 0.1rem; }
+  .citem-price { font-weight: 700; color: var(--moss-deep); font-size: 0.95rem; }
+  .citem-x { background: none; border: none; color: var(--clay); font-size: 0.74rem; cursor: pointer; margin-left: 0.5rem; font-weight: 700; }
+  .total-box { background: var(--paper); border: 1.5px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .total-word { font-weight: 700; font-size: 1.05rem; }
+  .total-num { font-family: 'Fraunces', serif; font-size: 1.55rem; font-weight: 700; color: var(--moss-deep); }
+  .pay-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; margin-bottom: 0.7rem; }
+  .pay-row { display: flex; flex-direction: column; gap: 0.7rem; }
+  .pay-btn { display: flex; align-items: center; gap: 0.8rem; padding: 1.05rem 1.2rem; border-radius: 13px; border: 2px solid var(--moss); background: var(--moss); color: #fff; font-family: 'Karla'; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.12s, opacity 0.12s; }
+  .pay-btn.alt { background: var(--paper); color: var(--ink); border-color: var(--line); }
+  .pay-btn:active { transform: scale(0.985); opacity: 0.92; }
+  .pay-btn.alt:active { border-color: var(--gold); }
+  .pay-ico { font-size: 1.35rem; }
+  .empty { text-align: center; padding: 2.5rem 1rem; color: var(--ink-soft); font-style: italic; }
+
+  /* ===== PAYMENT DETAIL ===== */
+  .pay-detail { padding: 1.5rem 1.25rem 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
+  .pay-amount-card { background: var(--paper); border: 2px solid var(--moss); border-radius: 18px; padding: 1.6rem 2rem; width: 100%; }
+  .pay-amount-label { font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; }
+  .pay-amount-num { font-family: 'Fraunces', serif; font-size: 3rem; font-weight: 700; color: var(--moss-deep); line-height: 1.1; margin-top: 0.3rem; }
+  .pay-instructions { font-size: 1rem; line-height: 1.55; color: var(--ink); max-width: 340px; }
+  .pay-link-btn { display: inline-block; padding: 1rem 2.4rem; background: var(--moss); color: #fff; border: none; border-radius: 12px; font-family: 'Karla'; font-size: 1.05rem; font-weight: 700; text-decoration: none; cursor: pointer; letter-spacing: 0.02em; }
+  .pay-link-btn:active { background: var(--moss-deep); }
+  .cash-icon { font-size: 3.5rem; }
+  .done-btn { margin-top: 0.5rem; padding: 0.8rem 2rem; background: none; border: 1.5px solid var(--line); border-radius: 11px; font-family: 'Karla'; font-size: 0.95rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+
+  /* ===== THANK YOU ===== */
+  .ty-screen { justify-content: center; align-items: center; text-align: center; padding: 2rem; gap: 1.1rem; }
+  .ty-icon { font-size: 4.5rem; animation: pop 0.7s cubic-bezier(0.2,1.4,0.5,1) 0.15s both; }
+  @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .ty-title { font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 600; }
+  .ty-sub { font-size: 1.02rem; color: var(--ink-soft); font-style: italic; max-width: 320px; line-height: 1.5; }
+  .ty-restart { margin-top: 1.5rem; padding: 0.85rem 2.2rem; background: var(--moss); color: #fff; border: none; border-radius: 11px; font-family: 'Karla'; font-size: 0.95rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   ⚙️  SETTINGS — EDIT THESE
+   ============================================================ */
+
+// Your Square (or other) payment link. Replace the placeholder below.
+// Until you set this, the "Pay by card" button shows a friendly note.
+const PAYMENT_LINK = "https://square.link/u/CdYHEy3d";
+
+// Link to your "About Reciprocity Farm" / pricing philosophy page.
+// Replace with your real page URL when ready.
+const ABOUT_LINK = "https://REPLACE-WITH-YOUR-ABOUT-PAGE";
+
+/* ============================================================
+   WEEKLY STOCK — Google Sheet (published as CSV)
+   The site reads this sheet to decide which crops to show.
+   To mark a crop sold out, change its "in_stock" cell to n
+   in the Google Sheet (y = show, n = hide). Updates appear
+   on the stand within a few minutes (Google caches the CSV).
+   Crop names in the sheet MUST match the names above exactly.
+   ============================================================ */
+const STOCK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuHHfgw8dGf5O1iJDA1jybJ4jCUBGutevuRULXws0tR6ROCNkR-dvSeKOZUhMDy-DPYgLNWKzG7ejy/pub?output=csv";
+
+/* ============================================================
+   SALES LOG — Google Form
+   Every completed sale (cash or card) is sent to this Google
+   Form, which writes a row to its linked Google Sheet. This
+   gives you one unified log to reconcile against your cash box.
+   Fields map to the "entry.XXXX" IDs from your form.
+   ============================================================ */
+const SALES_FORM_ID = "1FAIpQLSekL0usAtFfTig-2xFsm6w5bhT4lbMR1IyAuJe9wPWkgbGg3w";
+const SALES_FIELDS = {
+  items:   "entry.1948184290",
+  total:   "entry.673604122",
+  payment: "entry.611840260",
+  tier:    "entry.349226129",
+  language:"entry.1495141795"
+};
+
+// Published-as-CSV URL of the sheet your Form writes to (the sales responses).
+// Needed only for the hidden #admin daily-totals screen. Publish that sheet to
+// the web as CSV (File > Share > Publish to web > CSV) and paste the URL here.
+const SALES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_2dqEfC-FqJLfJGvQ6rqdFH7CNH3oYD61B_BcMyuHfMlrJjvSmqhUmM4cHcWXJMaQ6r-39JQBhXuk/pub?output=csv";
+
+/* ============================================================
+   PRICE DATA — pulled from your spreadsheet, rounded to $0.50
+   To change a price, edit the number here and re-upload the file.
+   Tiers: [At Cost, Minimum, Sustainer, Reciprocity]
+   ============================================================ */
+
+const PRODUCTS = [{"id": 1, "name": "Lettuce Mix", "emoji": "\ud83e\udd57", "unit": "1/2 lb bag", "photo": ""}, {"id": 2, "name": "Salad Mix", "emoji": "\ud83e\udd6c", "unit": "1/2 lb bag", "photo": ""}, {"id": 3, "name": "Baby Arugula", "emoji": "\ud83c\udf31", "unit": "1/2 lb bag", "photo": ""}, {"id": 4, "name": "Spinach", "emoji": "\ud83c\udf43", "unit": "1/2 lb bag", "photo": ""}, {"id": 5, "name": "Head Lettuce", "emoji": "\ud83e\udd6c", "unit": "1 head", "photo": ""}, {"id": 6, "name": "Radishes", "emoji": "\ud83d\udd34", "unit": "bunch of 15", "photo": ""}, {"id": 7, "name": "Carrots", "emoji": "\ud83e\udd55", "unit": "bunch of 8", "photo": ""}, {"id": 8, "name": "Green Onion", "emoji": "\ud83e\uddc5", "unit": "1 bunch", "photo": ""}, {"id": 9, "name": "Cilantro", "emoji": "\ud83c\udf3f", "unit": "1 bunch", "photo": ""}, {"id": 10, "name": "Basil", "emoji": "\ud83c\udf43", "unit": "1 bunch", "photo": ""}, {"id": 11, "name": "Beets", "emoji": "\ud83c\udf60", "unit": "1 bunch", "photo": ""}, {"id": 12, "name": "Bok Choy", "emoji": "\ud83e\udd6c", "unit": "bunch of 3", "photo": ""}, {"id": 13, "name": "Chinese Cabbage", "emoji": "\ud83e\udd6c", "unit": "1 head", "photo": ""}, {"id": 14, "name": "Cherry Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb", "photo": ""}, {"id": 15, "name": "Heirloom Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb", "photo": ""}, {"id": 16, "name": "Cucumber", "emoji": "\ud83e\udd52", "unit": "1 cucumber", "photo": ""}, {"id": 17, "name": "Peppers", "emoji": "\ud83e\uded1", "unit": "1 lb", "photo": ""}, {"id": 18, "name": "Salad Turnips", "emoji": "\u26aa", "unit": "1 bunch", "photo": ""}, {"id": 19, "name": "Snap Peas", "emoji": "\ud83e\udedb", "unit": "1 pint (~\u00bd lb)", "photo": ""}];
+
+const TIER_PRICES = {"0": {"Lettuce Mix": 4.0, "Salad Mix": 3.5, "Baby Arugula": 4.0, "Spinach": 4.5, "Head Lettuce": 1.0, "Radishes": 2.5, "Carrots": 2.5, "Green Onion": 1.0, "Cilantro": 2.5, "Basil": 2.5, "Beets": 2.5, "Bok Choy": 3.5, "Chinese Cabbage": 2.0, "Cherry Tomatoes": 2.0, "Heirloom Tomatoes": 1.0, "Cucumber": 1.0, "Peppers": 1.0, "Salad Turnips": 2.5, "Snap Peas": 4.0}, "1": {"Lettuce Mix": 5.5, "Salad Mix": 5.0, "Baby Arugula": 5.5, "Spinach": 6.5, "Head Lettuce": 1.5, "Radishes": 3.5, "Carrots": 4.0, "Green Onion": 1.5, "Cilantro": 3.5, "Basil": 3.5, "Beets": 4.0, "Bok Choy": 5.5, "Chinese Cabbage": 3.0, "Cherry Tomatoes": 5.0, "Heirloom Tomatoes": 2.0, "Cucumber": 2.0, "Peppers": 1.5, "Salad Turnips": 4.0, "Snap Peas": 6.0}, "2": {"Lettuce Mix": 6.5, "Salad Mix": 5.5, "Baby Arugula": 7.0, "Spinach": 7.5, "Head Lettuce": 2.0, "Radishes": 4.5, "Carrots": 5.0, "Green Onion": 1.5, "Cilantro": 4.5, "Basil": 4.5, "Beets": 5.0, "Bok Choy": 6.5, "Chinese Cabbage": 5.0, "Cherry Tomatoes": 6.0, "Heirloom Tomatoes": 3.0, "Cucumber": 2.0, "Peppers": 2.0, "Salad Turnips": 5.0, "Snap Peas": 7.0}, "3": {"Lettuce Mix": 10.0, "Salad Mix": 8.5, "Baby Arugula": 10.5, "Spinach": 11.5, "Head Lettuce": 3.0, "Radishes": 6.5, "Carrots": 7.0, "Green Onion": 2.5, "Cilantro": 6.5, "Basil": 6.5, "Beets": 6.0, "Bok Choy": 9.5, "Chinese Cabbage": 6.0, "Cherry Tomatoes": 8.0, "Heirloom Tomatoes": 4.0, "Cucumber": 3.0, "Peppers": 3.0, "Salad Turnips": 7.0, "Snap Peas": 11.0}};
+
+const TIER_COLORS = ["#5a7a4f", "#4a7a6a", "#43603a", "#b5683a"];
+
+/* ============================================================
+   TRANSLATIONS
+   ============================================================ */
+const T = {
+  en: { name:"English", flag:"🇺🇸", sub:"Farm Stand · Tacoma, WA",
+    pickLang:"Select your language",
+    chooseTier:"Choose your price", tierSub:"At Reciprocity Farm, we believe everyone should have access to fresh, healthy food, no matter their financial situation. Please choose the price that fits your situation right now. The suggested income is a guide, not a rule. We trust our community to choose what is fair, and together we will keep this farm growing and our neighbors fed.",
+    noOne:"No one is turned away. Take what you need, give what you can.",
+    family:"Guidelines based on a family of 4 · Pierce County, WA",
+    shopAt:"Shop at this price", shopTitle:"This Week's Harvest", add:"Add", cart:"Cart",
+    checkout:"Checkout", total:"Total", emptyCart:"Your cart is empty",
+    howPay:"How would you like to pay?", payCard:"Pay by card", payCash:"Pay with cash",
+    cardTitle:"Pay this amount by card", cardInstr:"Tap below to open the payment page, then enter the amount shown above.",
+    openPay:"Open payment page", cashTitle:"Please leave this amount", cashInstr:"Place your payment in the cash box. Thank you for your honesty.",
+    imDone:"I'm done", thanks:"Thank you!", thanksSub:"Enjoy your fresh food. We're glad you're here.",
+    startOver:"Start over", back:"Back", remove:"remove", yourTier:"Your price:", suggested:"Suggested income:", learn:"Learn more about Reciprocity Farm and our pricing model →" },
+  es: { name:"Español", flag:"🇲🇽", sub:"Puesto de Granja · Tacoma, WA",
+    pickLang:"Elige tu idioma",
+    chooseTier:"Elige tu precio", tierSub:"En Reciprocity Farm, creemos que todos deben tener acceso a alimentos frescos y saludables, sin importar su situación económica. Por favor, elige el precio que se ajuste a tu situación actual. El ingreso sugerido es una guía, no una regla. Confiamos en que nuestra comunidad elija lo que es justo, y juntos mantendremos esta granja creciendo y a nuestros vecinos alimentados.",
+    noOne:"Nadie se queda sin atender. Toma lo que necesites, da lo que puedas.",
+    family:"Guías basadas en una familia de 4 · Condado de Pierce, WA",
+    shopAt:"Comprar a este precio", shopTitle:"Cosecha de Esta Semana", add:"Añadir", cart:"Carrito",
+    checkout:"Pagar", total:"Total", emptyCart:"Tu carrito está vacío",
+    howPay:"¿Cómo deseas pagar?", payCard:"Pagar con tarjeta", payCash:"Pagar en efectivo",
+    cardTitle:"Paga esta cantidad con tarjeta", cardInstr:"Toca abajo para abrir la página de pago, luego ingresa la cantidad mostrada arriba.",
+    openPay:"Abrir página de pago", cashTitle:"Por favor deja esta cantidad", cashInstr:"Coloca tu pago en la caja. Gracias por tu honestidad.",
+    imDone:"Terminé", thanks:"¡Gracias!", thanksSub:"Disfruta tu comida fresca. Nos alegra que estés aquí.",
+    startOver:"Empezar de nuevo", back:"Atrás", remove:"quitar", yourTier:"Tu precio:", suggested:"Ingreso sugerido:", learn:"Conoce más sobre Reciprocity Farm y nuestro modelo de precios →" },
+  vi: { name:"Tiếng Việt", flag:"🇻🇳", sub:"Quầy Nông Trại · Tacoma, WA",
+    pickLang:"Chọn ngôn ngữ",
+    chooseTier:"Chọn mức giá", tierSub:"Tại Reciprocity Farm, chúng tôi tin rằng mọi người đều nên được tiếp cận thực phẩm tươi và lành mạnh, bất kể hoàn cảnh tài chính của họ. Vui lòng chọn mức giá phù hợp với hoàn cảnh hiện tại của bạn. Mức thu nhập gợi ý là hướng dẫn, không phải quy định. Chúng tôi tin tưởng cộng đồng sẽ chọn điều công bằng, và cùng nhau chúng ta sẽ giữ cho nông trại phát triển và hàng xóm được no đủ.",
+    noOne:"Không ai bị từ chối. Lấy những gì bạn cần, cho những gì bạn có thể.",
+    family:"Hướng dẫn dựa trên gia đình 4 người · Pierce County, WA",
+    shopAt:"Mua với giá này", shopTitle:"Thu Hoạch Tuần Này", add:"Thêm", cart:"Giỏ",
+    checkout:"Thanh toán", total:"Tổng", emptyCart:"Giỏ hàng trống",
+    howPay:"Bạn muốn thanh toán thế nào?", payCard:"Trả bằng thẻ", payCash:"Trả tiền mặt",
+    cardTitle:"Trả số tiền này bằng thẻ", cardInstr:"Nhấn bên dưới để mở trang thanh toán, sau đó nhập số tiền hiển thị ở trên.",
+    openPay:"Mở trang thanh toán", cashTitle:"Vui lòng để lại số tiền này", cashInstr:"Đặt tiền vào hộp. Cảm ơn sự trung thực của bạn.",
+    imDone:"Xong", thanks:"Cảm ơn!", thanksSub:"Thưởng thức thực phẩm tươi. Rất vui khi có bạn.",
+    startOver:"Bắt đầu lại", back:"Quay lại", remove:"xóa", yourTier:"Giá của bạn:", suggested:"Thu nhập gợi ý:", learn:"Tìm hiểu thêm về Reciprocity Farm và mô hình giá của chúng tôi →" },
+  so: { name:"Soomaali", flag:"🇸🇴", sub:"Suuqa Beerta · Tacoma, WA",
+    pickLang:"Dooro luqaddaada",
+    chooseTier:"Dooro qiimahaaga", tierSub:"Reciprocity Farm waxaan aaminsanahay in qof walba uu helo cunto cusub oo caafimaad leh, iyadoon loo eegin xaaladda dhaqaale. Fadlan dooro qiimaha ku habboon xaaladdaada hadda. Dakhliga la soo jeediyay waa hage, maaha xeer. Waxaan aaminsanahay bulshadeennu inay doorato waxa cadaalad ah, oo si wadajir ah waxaan u sii wadi doonaa beertan koritaankeeda iyo deriskeenna oo la quudiyo.",
+    noOne:"Cidna lama diido. Qaado waxaad u baahantahay, sii waxaad awooddo.",
+    family:"Tilmaamaha ku saleysan qoys 4 ah · Pierce County, WA",
+    shopAt:"Ku iibso qiimahan", shopTitle:"Goosashada Usbuucan", add:"Kudar", cart:"Dambiisha",
+    checkout:"Bixinta", total:"Wadarta", emptyCart:"Dambiishaadu waa madhan tahay",
+    howPay:"Sideed rabtaa inaad bixiso?", payCard:"Bixi kaarka", payCash:"Bixi lacag caddaan",
+    cardTitle:"Bixi qaddarkan kaarka", cardInstr:"Taabo hoosta si aad u furto boggicarka, ka dibna geli qaddarka kor lagu muujiyay.",
+    openPay:"Fur bogga lacag-bixinta", cashTitle:"Fadlan ka tag qaddarkan", cashInstr:"Geli lacagtaada sanduuqa. Mahadsanid daacadnimadaada.",
+    imDone:"Waan dhammeeyay", thanks:"Mahadsanid!", thanksSub:"Ku raaxayso cuntadaada cusub. Waan ku faraxsanahay joogitaankaaga.",
+    startOver:"Dib u bilow", back:"Dib", remove:"ka saar", yourTier:"Qiimahaaga:", suggested:"Dakhliga la soo jeediyay:", learn:"Wax badan ka baro Reciprocity Farm iyo qaabkayaga qiimaynta →" },
+  ru: { name:"Русский", flag:"🇷🇺", sub:"Фермерский прилавок · Tacoma, WA",
+    pickLang:"Выберите язык",
+    chooseTier:"Выберите цену", tierSub:"На ферме Reciprocity Farm мы верим, что у каждого должен быть доступ к свежей и здоровой еде, независимо от финансового положения. Пожалуйста, выберите цену, которая подходит вашей нынешней ситуации. Рекомендуемый доход — это ориентир, а не правило. Мы доверяем нашему сообществу выбрать справедливую цену, и вместе мы сохраним ферму растущей, а наших соседей сытыми.",
+    noOne:"Никому не отказывают. Берите что нужно, давайте что можете.",
+    family:"Ориентир для семьи из 4 человек · округ Пирс, Вашингтон",
+    shopAt:"Покупать по этой цене", shopTitle:"Урожай этой недели", add:"Добавить", cart:"Корзина",
+    checkout:"Оформить", total:"Итого", emptyCart:"Ваша корзина пуста",
+    howPay:"Как вы хотите заплатить?", payCard:"Оплата картой", payCash:"Оплата наличными",
+    cardTitle:"Оплатите эту сумму картой", cardInstr:"Нажмите ниже, чтобы открыть страницу оплаты, затем введите сумму, указанную выше.",
+    openPay:"Открыть страницу оплаты", cashTitle:"Пожалуйста, оставьте эту сумму", cashInstr:"Положите оплату в денежный ящик. Спасибо за вашу честность.",
+    imDone:"Готово", thanks:"Спасибо!", thanksSub:"Наслаждайтесь свежими продуктами. Мы рады видеть вас.",
+    startOver:"Начать заново", back:"Назад", remove:"убрать", yourTier:"Ваша цена:", suggested:"Рекомендуемый доход:", learn:"Узнайте больше о Reciprocity Farm и нашей модели ценообразования →" },
+  ko: { name:"한국어", flag:"🇰🇷", sub:"농장 가판대 · Tacoma, WA",
+    pickLang:"언어를 선택하세요",
+    chooseTier:"가격을 선택하세요", tierSub:"Reciprocity Farm은 재정 상황과 관계없이 누구나 신선하고 건강한 음식을 접할 수 있어야 한다고 믿습니다. 지금 당신의 상황에 맞는 가격을 선택해 주세요. 제안된 소득은 안내일 뿐, 규칙이 아닙니다. 우리는 공동체가 공정한 선택을 하리라 믿으며, 함께 이 농장을 키우고 이웃을 먹일 것입니다.",
+    noOne:"누구도 거절당하지 않습니다. 필요한 만큼 가져가고, 줄 수 있는 만큼 주세요.",
+    family:"4인 가족 기준 · 피어스 카운티, WA",
+    shopAt:"이 가격으로 쇼핑", shopTitle:"이번 주 수확물", add:"담기", cart:"장바구니",
+    checkout:"결제", total:"합계", emptyCart:"장바구니가 비어 있습니다",
+    howPay:"어떻게 결제하시겠어요?", payCard:"카드로 결제", payCash:"현금으로 결제",
+    cardTitle:"이 금액을 카드로 결제하세요", cardInstr:"아래를 눌러 결제 페이지를 연 다음, 위에 표시된 금액을 입력하세요.",
+    openPay:"결제 페이지 열기", cashTitle:"이 금액을 남겨주세요", cashInstr:"현금 상자에 결제 금액을 넣어주세요. 정직함에 감사드립니다.",
+    imDone:"완료", thanks:"감사합니다!", thanksSub:"신선한 음식을 즐기세요. 와주셔서 기쁩니다.",
+    startOver:"다시 시작", back:"뒤로", remove:"삭제", yourTier:"가격:", suggested:"제안 소득:", learn:"Reciprocity Farm과 가격 모델에 대해 더 알아보기 →" }
+};
+
+const TIER_TEXT = {
+  en: [
+    {n:"At Cost", e:"🌱", inc:"Under $40,000 / year", d:"Covers the raw cost of materials: seeds, compost, and water. Does not include labor."},
+    {n:"Minimum", e:"💚", inc:"$40,000 – $70,000 / year", d:"Covers materials and pays your farmers roughly minimum wage."},
+    {n:"Sustainer", e:"🌿", inc:"$70,000 – $110,000 / year", d:"Pays your farmers a living wage and covers all costs."},
+    {n:"Reciprocity", e:"🌻", inc:"$110,000+ / year", d:"Helps cover the cost for neighbors paying at the At Cost tier."}
+  ],
+  es: [
+    {n:"Al Costo", e:"🌱", inc:"Menos de $40,000 / año", d:"Cubre el costo básico de los materiales: semillas, abono y agua. No incluye la mano de obra."},
+    {n:"Mínimo", e:"💚", inc:"$40,000 – $70,000 / año", d:"Cubre los materiales y paga a tus agricultores aproximadamente el salario mínimo."},
+    {n:"Sostenedor", e:"🌿", inc:"$70,000 – $110,000 / año", d:"Paga a tus agricultores un salario digno y cubre todos los costos."},
+    {n:"Reciprocidad", e:"🌻", inc:"$110,000+ / año", d:"Ayuda a cubrir el costo de los vecinos que pagan en el nivel Al Costo."}
+  ],
+  vi: [
+    {n:"Giá Gốc", e:"🌱", inc:"Dưới $40,000 / năm", d:"Chi trả chi phí nguyên liệu thô: hạt giống, phân hữu cơ và nước. Không bao gồm công lao động."},
+    {n:"Tối Thiểu", e:"💚", inc:"$40,000 – $70,000 / năm", d:"Chi trả nguyên liệu và trả cho người nông dân khoảng mức lương tối thiểu."},
+    {n:"Duy Trì", e:"🌿", inc:"$70,000 – $110,000 / năm", d:"Trả cho người nông dân mức lương đủ sống và chi trả mọi chi phí."},
+    {n:"Hỗ Trợ", e:"🌻", inc:"$110,000+ / năm", d:"Giúp chi trả chi phí cho hàng xóm trả ở mức Giá Gốc."}
+  ],
+  so: [
+    {n:"Qiimaha Asalka", e:"🌱", inc:"Ka hooseeya $40,000 / sano", d:"Waxay daboolaysaa qiimaha aasaasiga ah ee qalabka: iniinaha, bacriminta, iyo biyaha. Kuma jiraan shaqada."},
+    {n:"Ugu Yar", e:"💚", inc:"$40,000 – $70,000 / sano", d:"Waxay daboolaysaa qalabka oo siisaa beeraleydaada qiyaastii mushaharka ugu yar."},
+    {n:"Taageere", e:"🌿", inc:"$70,000 – $110,000 / sano", d:"Waxay siisaa beeraleydaada mushahar nololeed oo daboolaysaa dhammaan kharashaadka."},
+    {n:"Wada-shaqayn", e:"🌻", inc:"$110,000+ / sano", d:"Waxay gacan ka geysataa kharashka deriska bixiya heerka Qiimaha Asalka."}
+  ],
+  ru: [
+    {n:"По себестоимости", e:"🌱", inc:"До $40,000 / год", d:"Покрывает основную стоимость материалов: семян, компоста и воды. Не включает труд."},
+    {n:"Минимум", e:"💚", inc:"$40,000 – $70,000 / год", d:"Покрывает материалы и платит вашим фермерам примерно минимальную зарплату."},
+    {n:"Поддержка", e:"🌿", inc:"$70,000 – $110,000 / год", d:"Платит вашим фермерам достойную зарплату и покрывает все расходы."},
+    {n:"Взаимность", e:"🌻", inc:"$110,000+ / год", d:"Помогает покрыть расходы для соседей, платящих по тарифу «По себестоимости»."}
+  ],
+  ko: [
+    {n:"원가", e:"🌱", inc:"연 $40,000 미만", d:"재료의 기본 비용을 충당합니다: 씨앗, 퇴비, 물. 인건비는 포함되지 않습니다."},
+    {n:"최소", e:"💚", inc:"연 $40,000 – $70,000", d:"재료비를 충당하고 농부에게 대략 최저임금을 지불합니다."},
+    {n:"지속", e:"🌿", inc:"연 $70,000 – $110,000", d:"농부에게 생활임금을 지불하고 모든 비용을 충당합니다."},
+    {n:"나눔", e:"🌻", inc:"연 $110,000 이상", d:"원가 등급으로 지불하는 이웃의 비용을 돕습니다."}
+  ]
+};
+
+/* ============================================================
+   APP STATE + RENDER
+   ============================================================ */
+let state = { screen:"lang", lang:"en", tier:null, cart:{}, payMode:null };
+
+// Set of crop names currently in stock (populated from the Google Sheet).
+// null = not loaded yet / failed → show ALL crops (safe fallback).
+let inStock = null;
+
+const app = document.getElementById("app");
+const fmt = n => "$" + n.toFixed(2);
+
+// Returns the products to show: filtered by stock if loaded, else all.
+function availableProducts() {
+  if (!inStock) return PRODUCTS;           // not loaded or failed → show all
+  const filtered = PRODUCTS.filter(p => inStock.has(p.name));
+  return filtered.length ? filtered : PRODUCTS; // never show an empty store
+}
+
+// Parse a simple 2-column CSV (crop,in_stock). Tolerates quotes/spaces/case.
+function parseStockCSV(text) {
+  const set = new Set();
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+  for (let i = 0; i < lines.length; i++) {
+    // split on first comma only (crop names have no commas; units aren't here)
+    const idx = lines[i].lastIndexOf(",");
+    if (idx === -1) continue;
+    let crop = lines[i].slice(0, idx).trim().replace(/^"|"$/g, "").trim();
+    let val  = lines[i].slice(idx + 1).trim().replace(/^"|"$/g, "").trim().toLowerCase();
+    if (crop.toLowerCase() === "crop") continue; // header row
+    const yes = (val === "y" || val === "yes" || val === "true" || val === "1");
+    if (yes) set.add(crop);
+  }
+  return set;
+}
+
+// Fetch stock from the Google Sheet. On any failure, leave inStock=null (show all).
+function loadStock() {
+  if (!STOCK_CSV_URL || STOCK_CSV_URL.includes("REPLACE")) return; // not configured
+  // cache-bust so toggles show up without a hard refresh
+  const url = STOCK_CSV_URL + (STOCK_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+  fetch(url)
+    .then(r => { if (!r.ok) throw new Error("bad status " + r.status); return r.text(); })
+    .then(text => {
+      const set = parseStockCSV(text);
+      if (set.size > 0) {
+        inStock = set;
+        if (state.screen === "shop") render(); // refresh if already shopping
+      }
+    })
+    .catch(err => { console.warn("Stock sheet not loaded, showing all crops:", err); });
+}
+
+// Build an itemized string like "2x Spinach @ $7.50, 1x Carrots @ $5.00"
+function buildItemsString() {
+  const p = prices();
+  return cartItems().map(([n,q]) => `${q}x ${n} @ ${fmt(p[n]||0)}`).join(", ");
+}
+
+// Running daily total, kept in this browser only (resets each day / per device).
+// This is a convenience tally for you at the stand, NOT the official record —
+// the Google Sheet is the source of truth.
+function todayKey() {
+  const d = new Date();
+  return "rf_daily_" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+function getDailyTotal() {
+  try { return parseFloat(sessionStorage.getItem(todayKey()) || "0") || 0; }
+  catch(e) { return runtimeDaily; }
+}
+function addToDailyTotal(amt) {
+  runtimeDaily += amt;
+  try { sessionStorage.setItem(todayKey(), String(getDailyTotalRaw() + amt)); } catch(e) {}
+}
+function getDailyTotalRaw() {
+  try { return parseFloat(sessionStorage.getItem(todayKey()) || "0") || 0; }
+  catch(e) { return runtimeDaily; }
+}
+let runtimeDaily = 0;
+
+// Send a completed sale to the Google Form. Fire-and-forget: we can't read the
+// response (browser security), so we never block the customer on it. If it
+// fails, the sale still completes — the worst case is one unlogged row.
+function recordSale() {
+  if (!SALES_FORM_ID || SALES_FORM_ID.includes("REPLACE")) return;
+  try {
+    const url = "https://docs.google.com/forms/d/e/" + SALES_FORM_ID + "/formResponse";
+    const data = new FormData();
+    data.append(SALES_FIELDS.items,    buildItemsString());
+    data.append(SALES_FIELDS.total,    cartTotal().toFixed(2));
+    data.append(SALES_FIELDS.payment,  state.payMode === "card" ? "Card" : "Cash");
+    data.append(SALES_FIELDS.tier,     state.tier !== null ? TIER_TEXT.en[state.tier].n : "");
+    data.append(SALES_FIELDS.language, T[state.lang].name);
+    // no-cors: we don't need (and can't read) the response
+    fetch(url, { method: "POST", mode: "no-cors", body: data })
+      .catch(err => console.warn("Sale log failed (sale still complete):", err));
+    addToDailyTotal(cartTotal());
+  } catch (err) {
+    console.warn("Sale log error (sale still complete):", err);
+  }
+}
+
+function t() { return T[state.lang]; }
+function prices() { return state.tier !== null ? TIER_PRICES[String(state.tier)] : {}; }
+function cartItems() { return Object.entries(state.cart).filter(([,q]) => q > 0); }
+function cartCount() { return cartItems().reduce((s,[,q]) => s+q, 0); }
+function cartTotal() { return cartItems().reduce((s,[n,q]) => s + (prices()[n]||0)*q, 0); }
+function prodByName(n) { return PRODUCTS.find(p => p.name === n); }
+
+function go(screen) { state.screen = screen; render(); }
+
+function render() {
+  if (state.screen === "admin") return renderAdmin();
+  if (state.screen === "lang") return renderLang();
+  if (state.screen === "tier") return renderTier();
+  if (state.screen === "shop") return renderShop();
+  if (state.screen === "checkout") return renderCheckout();
+  if (state.screen === "paydetail") return renderPayDetail();
+  if (state.screen === "thanks") return renderThanks();
+}
+
+function renderLang() {
+  app.innerHTML = `
+    <div class="screen lang-screen">
+      <div>
+        <div class="logo-mark">🌾</div>
+        <div class="logo-title">Reciprocity<br>Farm</div>
+        <div class="logo-sub">Farm Stand · Tacoma, WA</div>
+      </div>
+      <div class="lang-label">Select your language · Elige tu idioma</div>
+      <div class="lang-grid">
+        ${Object.entries(T).map(([code,tr]) => `
+          <button class="lang-btn" data-lang="${code}">
+            <span class="lang-flag">${tr.flag}</span><span>${tr.name}</span>
+          </button>`).join("")}
+      </div>
+    </div>`;
+  app.querySelectorAll(".lang-btn").forEach(b =>
+    b.onclick = () => { state.lang = b.dataset.lang; go("tier"); });
+}
+
+function renderTier() {
+  const tx = t(), tt = TIER_TEXT[state.lang];
+  app.innerHTML = `
+    <div class="screen">
+      <div class="top-bar"><button class="back-btn" id="bk">← ${tx.back}</button></div>
+      <div class="tier-screen">
+        <div class="heading">${tx.chooseTier}</div>
+        <div class="subhead">${tx.tierSub}</div>
+        <div class="tier-list">
+          ${tt.map((ti,i) => `
+            <div class="tier-card" style="--tc:${TIER_COLORS[i]}">
+              <div class="tier-head"><span class="tier-emoji">${ti.e}</span><span class="tier-name">${ti.n}</span></div>
+              <div class="tier-income"><span class="income-label">${tx.suggested}</span> ${ti.inc}</div>
+              <div class="tier-desc">${ti.d}</div>
+              <button class="tier-go" data-tier="${i}" style="--tc:${TIER_COLORS[i]}">${tx.shopAt}</button>
+            </div>`).join("")}
+        </div>
+        <div class="honor-box">${tx.noOne}</div>
+        <div class="fine-note">${tx.family}</div>
+        <a class="learn-link" id="learn" href="${ABOUT_LINK}" target="_blank" rel="noopener">${tx.learn}</a>
+      </div>
+    </div>`;
+  app.querySelector("#bk").onclick = () => go("lang");
+  app.querySelectorAll(".tier-go").forEach(b =>
+    b.onclick = () => { state.tier = +b.dataset.tier; state.cart = {}; go("shop"); });
+}
+
+function renderShop() {
+  const tx = t(), p = prices(), tc = TIER_COLORS[state.tier];
+  const tcbg = tc + "1e";
+  const tierName = TIER_TEXT[state.lang][state.tier].n;
+  const tierEmoji = TIER_TEXT[state.lang][state.tier].e;
+  app.innerHTML = `
+    <div class="screen">
+      <div class="shop-head">
+        <div class="shop-head-row">
+          <div class="shop-title">${tx.shopTitle}</div>
+          <span class="tier-pill" id="pill" style="--tc:${tc};--tcbg:${tcbg}">${tierEmoji} ${tierName} ⌄</span>
+        </div>
+      </div>
+      <div class="grid">
+        ${availableProducts().map(prod => {
+          const qty = state.cart[prod.name] || 0;
+          const priceStr = fmt(p[prod.name] || 0);
+          return `
+          <div class="card">
+            <div class="card-emoji">${prod.photo ? `<img class="card-photo" src="${prod.photo}" alt="${prod.name}">` : prod.emoji}</div>
+            <div class="card-name">${prod.name}</div>
+            <div class="card-unit">${prod.unit}</div>
+            <div class="card-price">${priceStr}</div>
+            ${qty > 0 ? `
+              <div class="stepper">
+                <button class="step-btn" data-dec="${prod.name}">−</button>
+                <span class="step-qty">${qty}</span>
+                <button class="step-btn" data-inc="${prod.name}">+</button>
+              </div>` : `
+              <button class="add-btn" data-add="${prod.name}">${tx.add}</button>`}
+          </div>`;
+        }).join("")}
+      </div>
+      ${cartCount() > 0 ? `
+        <div class="cart-bar" id="cartbar">
+          <div class="cart-left"><span class="cart-count">${cartCount()}</span><span class="cart-word">${tx.cart}</span></div>
+          <span class="cart-total">${fmt(cartTotal())}</span>
+        </div>` : ``}
+    </div>`;
+
+  app.querySelector("#pill").onclick = () => go("tier");
+  app.querySelectorAll("[data-add]").forEach(b => b.onclick = () => { state.cart[b.dataset.add] = 1; render(); });
+  app.querySelectorAll("[data-inc]").forEach(b => b.onclick = () => { state.cart[b.dataset.inc]++; render(); });
+  app.querySelectorAll("[data-dec]").forEach(b => b.onclick = () => {
+    const n = b.dataset.dec; state.cart[n]--; if (state.cart[n] <= 0) delete state.cart[n]; render();
+  });
+  const cb = app.querySelector("#cartbar");
+  if (cb) cb.onclick = () => go("checkout");
+}
+
+function renderCheckout() {
+  const tx = t(), p = prices();
+  const items = cartItems();
+  app.innerHTML = `
+    <div class="screen">
+      <div class="top-bar"><button class="back-btn" id="bk">← ${tx.back}</button></div>
+      <div class="checkout-screen">
+        <div class="heading" style="margin-bottom:1.1rem">${tx.cart}</div>
+        <div class="cart-items">
+          ${items.length === 0 ? `<div class="empty">${tx.emptyCart}</div>` :
+            items.map(([n,q]) => {
+              const prod = prodByName(n);
+              return `<div class="citem">
+                <div class="citem-left">
+                  <span class="citem-emoji">${prod.photo ? `<img class="citem-photo" src="${prod.photo}" alt="${prod.name}">` : prod.emoji}</span>
+                  <div>
+                    <div class="citem-name">${n}</div>
+                    <div class="citem-meta">×${q} · ${prod.unit} · ${fmt(p[n]||0)} ${tx.remove ? `<button class="citem-x" data-rm="${n}">${tx.remove}</button>` : ``}</div>
+                  </div>
+                </div>
+                <span class="citem-price">${fmt((p[n]||0)*q)}</span>
+              </div>`;
+            }).join("")}
+        </div>
+        ${items.length > 0 ? `
+          <div class="total-box"><span class="total-word">${tx.total}</span><span class="total-num">${fmt(cartTotal())}</span></div>
+          <div class="pay-label">${tx.howPay}</div>
+          <div class="pay-row">
+            <button class="pay-btn" id="card"><span class="pay-ico">💳</span>${tx.payCard}</button>
+            <button class="pay-btn alt" id="cash"><span class="pay-ico">💵</span>${tx.payCash}</button>
+          </div>` : ``}
+      </div>
+    </div>`;
+  app.querySelector("#bk").onclick = () => go("shop");
+  app.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { delete state.cart[b.dataset.rm]; render(); });
+  const card = app.querySelector("#card"), cash = app.querySelector("#cash");
+  if (card) card.onclick = () => { state.payMode = "card"; go("paydetail"); };
+  if (cash) cash.onclick = () => { state.payMode = "cash"; go("paydetail"); };
+}
+
+function renderPayDetail() {
+  const tx = t(), total = cartTotal();
+  const linkSet = PAYMENT_LINK && !PAYMENT_LINK.includes("REPLACE");
+  if (state.payMode === "card") {
+    app.innerHTML = `
+      <div class="screen">
+        <div class="top-bar"><button class="back-btn" id="bk">← ${tx.back}</button></div>
+        <div class="pay-detail">
+          <div class="pay-amount-card">
+            <div class="pay-amount-label">${tx.total}</div>
+            <div class="pay-amount-num">${fmt(total)}</div>
+          </div>
+          <div class="pay-instructions">${tx.cardInstr}</div>
+          ${linkSet
+            ? `<a class="pay-link-btn" href="${PAYMENT_LINK}" target="_blank" rel="noopener">${tx.openPay} →</a>`
+            : `<div style="background:#fff5e8;border:1px solid #e8c98a;border-radius:12px;padding:1rem;font-size:0.85rem;color:#8a6d1f;max-width:340px">⚙️ Payment link not set yet. Open this file and replace PAYMENT_LINK near the top of the script with your Square link.</div>`}
+          <button class="done-btn" id="done">${tx.imDone} →</button>
+        </div>
+      </div>`;
+  } else {
+    app.innerHTML = `
+      <div class="screen">
+        <div class="top-bar"><button class="back-btn" id="bk">← ${tx.back}</button></div>
+        <div class="pay-detail">
+          <div class="cash-icon">💵</div>
+          <div class="pay-amount-card">
+            <div class="pay-amount-label">${tx.cashTitle}</div>
+            <div class="pay-amount-num">${fmt(total)}</div>
+          </div>
+          <div class="pay-instructions">${tx.cashInstr}</div>
+          <button class="pay-link-btn" id="done2">${tx.imDone} →</button>
+        </div>
+      </div>`;
+  }
+  app.querySelector("#bk").onclick = () => go("checkout");
+  const d1 = app.querySelector("#done"), d2 = app.querySelector("#done2");
+  if (d1) d1.onclick = () => { recordSale(); go("thanks"); };
+  if (d2) d2.onclick = () => { recordSale(); go("thanks"); };
+}
+
+/* ============================================================
+   HIDDEN ADMIN — daily sales totals, read live from the sheet.
+   Reach it by adding #admin to your site URL. Not linked anywhere.
+   ============================================================ */
+function parseSalesCSV(text) {
+  // Robust CSV parse handling quoted fields with commas.
+  const rows = [];
+  let row = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else field += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ",") { row.push(field); field = ""; }
+      else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+      else if (c === "\r") { /* skip */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function isToday(dateStr) {
+  // Google's auto timestamp looks like "6/4/2026 14:32:07" or ISO-ish.
+  const d = new Date(dateStr);
+  if (isNaN(d)) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() &&
+         d.getMonth() === now.getMonth() &&
+         d.getDate() === now.getDate();
+}
+
+function renderAdmin() {
+  app.innerHTML = `
+    <div class="screen" style="padding:1.5rem 1.25rem">
+      <div class="heading" style="margin-bottom:0.3rem">Daily Sales</div>
+      <div class="subhead" id="adminDate"></div>
+      <div id="adminBody"><div class="empty">Loading today's sales…</div></div>
+      <button class="done-btn" id="adminBack" style="margin-top:1.5rem">← Back to stand</button>
+    </div>`;
+  const d = new Date();
+  app.querySelector("#adminDate").textContent =
+    d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+  app.querySelector("#adminBack").onclick = () => { location.hash = ""; state.screen = "lang"; render(); };
+
+  if (!SALES_CSV_URL || SALES_CSV_URL.includes("REPLACE")) {
+    app.querySelector("#adminBody").innerHTML =
+      `<div style="background:#fff5e8;border:1px solid #e8c98a;border-radius:12px;padding:1rem;font-size:0.85rem;color:#8a6d1f">
+        Sales sheet not connected yet. Publish your Form's response sheet as CSV and paste the URL into SALES_CSV_URL near the top of the file.
+      </div>`;
+    return;
+  }
+
+  const url = SALES_CSV_URL + (SALES_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+  fetch(url)
+    .then(r => { if (!r.ok) throw new Error("status " + r.status); return r.text(); })
+    .then(text => {
+      const rows = parseSalesCSV(text);
+      if (rows.length < 2) { showAdmin({count:0,total:0,cash:0,card:0,cashN:0,cardN:0,tiers:{}}); return; }
+      const header = rows[0].map(h => h.trim().toLowerCase());
+      const iTime = 0; // Google's auto timestamp is always column A
+      const iTotal = header.findIndex(h => h.includes("total"));
+      const iPay   = header.findIndex(h => h.includes("payment"));
+      const iTier  = header.findIndex(h => h.includes("tier"));
+      let agg = { count:0, total:0, cash:0, card:0, cashN:0, cardN:0, tiers:{} };
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || !row[iTime]) continue;
+        if (!isToday(row[iTime])) continue;
+        const amt = parseFloat((row[iTotal]||"").replace(/[^0-9.]/g,"")) || 0;
+        const pay = (row[iPay]||"").trim().toLowerCase();
+        const tier = (row[iTier]||"").trim() || "Unknown";
+        agg.count++; agg.total += amt;
+        if (pay === "card") { agg.card += amt; agg.cardN++; }
+        else { agg.cash += amt; agg.cashN++; }
+        agg.tiers[tier] = (agg.tiers[tier] || 0) + amt;
+      }
+      showAdmin(agg);
+    })
+    .catch(err => {
+      app.querySelector("#adminBody").innerHTML =
+        `<div class="empty">Couldn't load sales (${err.message}). Check the published CSV URL.</div>`;
+    });
+}
+
+function showAdmin(a) {
+  const tierRows = Object.keys(a.tiers).length
+    ? Object.entries(a.tiers).map(([k,v]) =>
+        `<div class="citem"><div class="citem-left"><span class="citem-name">${k}</span></div><span class="citem-price">${fmt(v)}</span></div>`).join("")
+    : `<div class="empty">No sales yet today</div>`;
+  app.querySelector("#adminBody").innerHTML = `
+    <div class="total-box" style="margin-bottom:1rem">
+      <span class="total-word">Today's Total</span>
+      <span class="total-num">${fmt(a.total)}</span>
+    </div>
+    <div class="cart-items" style="margin-bottom:1rem">
+      <div class="citem"><div class="citem-left"><span class="citem-name">💵 Cash</span><span class="citem-meta">${a.cashN} sale${a.cashN===1?"":"s"}</span></div><span class="citem-price">${fmt(a.cash)}</span></div>
+      <div class="citem"><div class="citem-left"><span class="citem-name">💳 Card</span><span class="citem-meta">${a.cardN} sale${a.cardN===1?"":"s"}</span></div><span class="citem-price">${fmt(a.card)}</span></div>
+      <div class="citem"><div class="citem-left"><span class="citem-name">Total sales</span></div><span class="citem-price">${a.count}</span></div>
+    </div>
+    <div class="pay-label">By Price Tier</div>
+    <div class="cart-items">${tierRows}</div>`;
+}
+
+function renderThanks() {
+  const tx = t();
+  app.innerHTML = `
+    <div class="screen ty-screen">
+      <div class="ty-icon">🌾</div>
+      <div class="ty-title">${tx.thanks}</div>
+      <div class="ty-sub">${tx.thanksSub}</div>
+      <button class="ty-restart" id="rs">${tx.startOver}</button>
+    </div>`;
+  app.querySelector("#rs").onclick = () => { state = { screen:"lang", lang:"en", tier:null, cart:{}, payMode:null }; render(); };
+}
+
+loadStock();
+// Hidden admin: visiting the site with #admin in the URL opens the sales dashboard.
+function checkHash() {
+  if (location.hash.toLowerCase() === "#admin") { state.screen = "admin"; render(); return true; }
+  return false;
+}
+window.addEventListener("hashchange", () => { if (!checkHash()) { state.screen = "lang"; render(); } });
+if (!checkHash()) render();
+</script>
+</body>
+</html>
