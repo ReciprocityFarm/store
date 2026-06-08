@@ -122,6 +122,7 @@
   }
   .card:hover { border-color: var(--moss); box-shadow: 0 7px 16px rgba(43,36,23,0.1); }
   .card-emoji { font-size: 2.5rem; line-height: 1; }
+  .card-photo { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 2px solid var(--line); display: block; }
   .card-name { font-family: 'Fraunces', serif; font-size: 0.95rem; font-weight: 600; text-align: center; line-height: 1.15; }
   .card-unit { font-size: 0.7rem; color: var(--ink-soft); }
   .card-price { font-size: 1.15rem; font-weight: 700; color: var(--moss-deep); margin-top: 0.1rem; }
@@ -147,6 +148,7 @@
   .citem:last-child { border-bottom: none; }
   .citem-left { display: flex; align-items: center; gap: 0.65rem; }
   .citem-emoji { font-size: 1.45rem; }
+  .citem-photo { width: 34px; height: 34px; object-fit: cover; border-radius: 50%; display: block; }
   .citem-name { font-weight: 700; font-size: 0.92rem; }
   .citem-meta { font-size: 0.74rem; color: var(--ink-soft); margin-top: 0.1rem; }
   .citem-price { font-weight: 700; color: var(--moss-deep); font-size: 0.95rem; }
@@ -193,7 +195,7 @@
 
 // Your Square (or other) payment link. Replace the placeholder below.
 // Until you set this, the "Pay by card" button shows a friendly note.
-const PAYMENT_LINK = "https://squareup.com/REPLACE-WITH-YOUR-LINK";
+const PAYMENT_LINK = "https://square.link/u/CdYHEy3d";
 
 // Link to your "About Reciprocity Farm" / pricing philosophy page.
 // Replace with your real page URL when ready.
@@ -210,12 +212,33 @@ const ABOUT_LINK = "https://REPLACE-WITH-YOUR-ABOUT-PAGE";
 const STOCK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuHHfgw8dGf5O1iJDA1jybJ4jCUBGutevuRULXws0tR6ROCNkR-dvSeKOZUhMDy-DPYgLNWKzG7ejy/pub?output=csv";
 
 /* ============================================================
+   SALES LOG — Google Form
+   Every completed sale (cash or card) is sent to this Google
+   Form, which writes a row to its linked Google Sheet. This
+   gives you one unified log to reconcile against your cash box.
+   Fields map to the "entry.XXXX" IDs from your form.
+   ============================================================ */
+const SALES_FORM_ID = "1FAIpQLSekL0usAtFfTig-2xFsm6w5bhT4lbMR1IyAuJe9wPWkgbGg3w";
+const SALES_FIELDS = {
+  items:   "entry.1948184290",
+  total:   "entry.673604122",
+  payment: "entry.611840260",
+  tier:    "entry.349226129",
+  language:"entry.1495141795"
+};
+
+// Published-as-CSV URL of the sheet your Form writes to (the sales responses).
+// Needed only for the hidden #admin daily-totals screen. Publish that sheet to
+// the web as CSV (File > Share > Publish to web > CSV) and paste the URL here.
+const SALES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_2dqEfC-FqJLfJGvQ6rqdFH7CNH3oYD61B_BcMyuHfMlrJjvSmqhUmM4cHcWXJMaQ6r-39JQBhXuk/pub?output=csv";
+
+/* ============================================================
    PRICE DATA — pulled from your spreadsheet, rounded to $0.50
    To change a price, edit the number here and re-upload the file.
    Tiers: [At Cost, Minimum, Sustainer, Reciprocity]
    ============================================================ */
 
-const PRODUCTS = [{"id": 1, "name": "Lettuce Mix", "emoji": "\ud83e\udd57", "unit": "1/2 lb bag"}, {"id": 2, "name": "Salad Mix", "emoji": "\ud83c\udf3f", "unit": "1/2 lb bag"}, {"id": 3, "name": "Baby Arugula", "emoji": "\ud83c\udf31", "unit": "1/2 lb bag"}, {"id": 4, "name": "Spinach", "emoji": "\ud83c\udf43", "unit": "1/2 lb bag"}, {"id": 5, "name": "Head Lettuce", "emoji": "\ud83e\udd6c", "unit": "1 head"}, {"id": 6, "name": "Radishes", "emoji": "\ud83c\udf30", "unit": "bunch of 15"}, {"id": 7, "name": "Carrots", "emoji": "\ud83e\udd55", "unit": "bunch of 8"}, {"id": 8, "name": "Green Onion", "emoji": "\ud83e\uddc5", "unit": "1 bunch"}, {"id": 9, "name": "Cilantro", "emoji": "\ud83c\udf3f", "unit": "1 bunch"}, {"id": 10, "name": "Basil", "emoji": "\ud83c\udf3f", "unit": "1 bunch"}, {"id": 11, "name": "Beets", "emoji": "\ud83e\udeda", "unit": "1 bunch"}, {"id": 12, "name": "Bok Choy", "emoji": "\ud83e\udd66", "unit": "bunch of 3"}, {"id": 13, "name": "Chinese Cabbage", "emoji": "\ud83e\udd6c", "unit": "1 head"}, {"id": 14, "name": "Cherry Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb"}, {"id": 15, "name": "Heirloom Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb"}, {"id": 16, "name": "Cucumber", "emoji": "\ud83e\udd52", "unit": "1 cucumber"}, {"id": 17, "name": "Peppers", "emoji": "\ud83e\udd91", "unit": "1 lb"}, {"id": 18, "name": "Salad Turnips", "emoji": "\u26aa", "unit": "1 bunch"}, {"id": 19, "name": "Snap Peas", "emoji": "\ud83e\udedb", "unit": "1 pint (~\u00bd lb)"}];
+const PRODUCTS = [{"id": 1, "name": "Lettuce Mix", "emoji": "\ud83e\udd57", "unit": "1/2 lb bag", "photo": ""}, {"id": 2, "name": "Salad Mix", "emoji": "\ud83e\udd6c", "unit": "1/2 lb bag", "photo": ""}, {"id": 3, "name": "Baby Arugula", "emoji": "\ud83c\udf31", "unit": "1/2 lb bag", "photo": ""}, {"id": 4, "name": "Spinach", "emoji": "\ud83c\udf43", "unit": "1/2 lb bag", "photo": ""}, {"id": 5, "name": "Head Lettuce", "emoji": "\ud83e\udd6c", "unit": "1 head", "photo": ""}, {"id": 6, "name": "Radishes", "emoji": "\ud83d\udd34", "unit": "bunch of 15", "photo": ""}, {"id": 7, "name": "Carrots", "emoji": "\ud83e\udd55", "unit": "bunch of 8", "photo": ""}, {"id": 8, "name": "Green Onion", "emoji": "\ud83e\uddc5", "unit": "1 bunch", "photo": ""}, {"id": 9, "name": "Cilantro", "emoji": "\ud83c\udf3f", "unit": "1 bunch", "photo": ""}, {"id": 10, "name": "Basil", "emoji": "\ud83c\udf43", "unit": "1 bunch", "photo": ""}, {"id": 11, "name": "Beets", "emoji": "\ud83c\udf60", "unit": "1 bunch", "photo": ""}, {"id": 12, "name": "Bok Choy", "emoji": "\ud83e\udd6c", "unit": "bunch of 3", "photo": ""}, {"id": 13, "name": "Chinese Cabbage", "emoji": "\ud83e\udd6c", "unit": "1 head", "photo": ""}, {"id": 14, "name": "Cherry Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb", "photo": ""}, {"id": 15, "name": "Heirloom Tomatoes", "emoji": "\ud83c\udf45", "unit": "1 lb", "photo": ""}, {"id": 16, "name": "Cucumber", "emoji": "\ud83e\udd52", "unit": "1 cucumber", "photo": ""}, {"id": 17, "name": "Peppers", "emoji": "\ud83e\uded1", "unit": "1 lb", "photo": ""}, {"id": 18, "name": "Salad Turnips", "emoji": "\u26aa", "unit": "1 bunch", "photo": ""}, {"id": 19, "name": "Snap Peas", "emoji": "\ud83e\udedb", "unit": "1 pint (~\u00bd lb)", "photo": ""}];
 
 const TIER_PRICES = {"0": {"Lettuce Mix": 4.0, "Salad Mix": 3.5, "Baby Arugula": 4.0, "Spinach": 4.5, "Head Lettuce": 1.0, "Radishes": 2.5, "Carrots": 2.5, "Green Onion": 1.0, "Cilantro": 2.5, "Basil": 2.5, "Beets": 2.5, "Bok Choy": 3.5, "Chinese Cabbage": 2.0, "Cherry Tomatoes": 2.0, "Heirloom Tomatoes": 1.0, "Cucumber": 1.0, "Peppers": 1.0, "Salad Turnips": 2.5, "Snap Peas": 4.0}, "1": {"Lettuce Mix": 5.5, "Salad Mix": 5.0, "Baby Arugula": 5.5, "Spinach": 6.5, "Head Lettuce": 1.5, "Radishes": 3.5, "Carrots": 4.0, "Green Onion": 1.5, "Cilantro": 3.5, "Basil": 3.5, "Beets": 4.0, "Bok Choy": 5.5, "Chinese Cabbage": 3.0, "Cherry Tomatoes": 5.0, "Heirloom Tomatoes": 2.0, "Cucumber": 2.0, "Peppers": 1.5, "Salad Turnips": 4.0, "Snap Peas": 6.0}, "2": {"Lettuce Mix": 6.5, "Salad Mix": 5.5, "Baby Arugula": 7.0, "Spinach": 7.5, "Head Lettuce": 2.0, "Radishes": 4.5, "Carrots": 5.0, "Green Onion": 1.5, "Cilantro": 4.5, "Basil": 4.5, "Beets": 5.0, "Bok Choy": 6.5, "Chinese Cabbage": 5.0, "Cherry Tomatoes": 6.0, "Heirloom Tomatoes": 3.0, "Cucumber": 2.0, "Peppers": 2.0, "Salad Turnips": 5.0, "Snap Peas": 7.0}, "3": {"Lettuce Mix": 10.0, "Salad Mix": 8.5, "Baby Arugula": 10.5, "Spinach": 11.5, "Head Lettuce": 3.0, "Radishes": 6.5, "Carrots": 7.0, "Green Onion": 2.5, "Cilantro": 6.5, "Basil": 6.5, "Beets": 6.0, "Bok Choy": 9.5, "Chinese Cabbage": 6.0, "Cherry Tomatoes": 8.0, "Heirloom Tomatoes": 4.0, "Cucumber": 3.0, "Peppers": 3.0, "Salad Turnips": 7.0, "Snap Peas": 11.0}};
 
@@ -391,6 +414,54 @@ function loadStock() {
     .catch(err => { console.warn("Stock sheet not loaded, showing all crops:", err); });
 }
 
+// Build an itemized string like "2x Spinach @ $7.50, 1x Carrots @ $5.00"
+function buildItemsString() {
+  const p = prices();
+  return cartItems().map(([n,q]) => `${q}x ${n} @ ${fmt(p[n]||0)}`).join(", ");
+}
+
+// Running daily total, kept in this browser only (resets each day / per device).
+// This is a convenience tally for you at the stand, NOT the official record —
+// the Google Sheet is the source of truth.
+function todayKey() {
+  const d = new Date();
+  return "rf_daily_" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+function getDailyTotal() {
+  try { return parseFloat(sessionStorage.getItem(todayKey()) || "0") || 0; }
+  catch(e) { return runtimeDaily; }
+}
+function addToDailyTotal(amt) {
+  runtimeDaily += amt;
+  try { sessionStorage.setItem(todayKey(), String(getDailyTotalRaw() + amt)); } catch(e) {}
+}
+function getDailyTotalRaw() {
+  try { return parseFloat(sessionStorage.getItem(todayKey()) || "0") || 0; }
+  catch(e) { return runtimeDaily; }
+}
+let runtimeDaily = 0;
+
+// Send a completed sale to the Google Form. Fire-and-forget: we can't read the
+// response (browser security), so we never block the customer on it. If it
+// fails, the sale still completes — the worst case is one unlogged row.
+function recordSale() {
+  if (!SALES_FORM_ID || SALES_FORM_ID.includes("REPLACE")) return;
+  try {
+    const url = "https://docs.google.com/forms/d/e/" + SALES_FORM_ID + "/formResponse";
+    const data = new FormData();
+    data.append(SALES_FIELDS.items,    buildItemsString());
+    data.append(SALES_FIELDS.total,    cartTotal().toFixed(2));
+    data.append(SALES_FIELDS.payment,  state.payMode === "card" ? "Card" : "Cash");
+    data.append(SALES_FIELDS.tier,     state.tier !== null ? TIER_TEXT.en[state.tier].n : "");
+    data.append(SALES_FIELDS.language, T[state.lang].name);
+    // no-cors: we don't need (and can't read) the response
+    fetch(url, { method: "POST", mode: "no-cors", body: data })
+      .catch(err => console.warn("Sale log failed (sale still complete):", err));
+    addToDailyTotal(cartTotal());
+  } catch (err) {
+    console.warn("Sale log error (sale still complete):", err);
+  }
+}
 
 function t() { return T[state.lang]; }
 function prices() { return state.tier !== null ? TIER_PRICES[String(state.tier)] : {}; }
@@ -402,6 +473,7 @@ function prodByName(n) { return PRODUCTS.find(p => p.name === n); }
 function go(screen) { state.screen = screen; render(); }
 
 function render() {
+  if (state.screen === "admin") return renderAdmin();
   if (state.screen === "lang") return renderLang();
   if (state.screen === "tier") return renderTier();
   if (state.screen === "shop") return renderShop();
@@ -476,7 +548,7 @@ function renderShop() {
           const priceStr = fmt(p[prod.name] || 0);
           return `
           <div class="card">
-            <div class="card-emoji">${prod.emoji}</div>
+            <div class="card-emoji">${prod.photo ? `<img class="card-photo" src="${prod.photo}" alt="${prod.name}">` : prod.emoji}</div>
             <div class="card-name">${prod.name}</div>
             <div class="card-unit">${prod.unit}</div>
             <div class="card-price">${priceStr}</div>
@@ -521,7 +593,7 @@ function renderCheckout() {
               const prod = prodByName(n);
               return `<div class="citem">
                 <div class="citem-left">
-                  <span class="citem-emoji">${prod.emoji}</span>
+                  <span class="citem-emoji">${prod.photo ? `<img class="citem-photo" src="${prod.photo}" alt="${prod.name}">` : prod.emoji}</span>
                   <div>
                     <div class="citem-name">${n}</div>
                     <div class="citem-meta">×${q} · ${prod.unit} · ${fmt(p[n]||0)} ${tx.remove ? `<button class="citem-x" data-rm="${n}">${tx.remove}</button>` : ``}</div>
@@ -583,8 +655,116 @@ function renderPayDetail() {
   }
   app.querySelector("#bk").onclick = () => go("checkout");
   const d1 = app.querySelector("#done"), d2 = app.querySelector("#done2");
-  if (d1) d1.onclick = () => go("thanks");
-  if (d2) d2.onclick = () => go("thanks");
+  if (d1) d1.onclick = () => { recordSale(); go("thanks"); };
+  if (d2) d2.onclick = () => { recordSale(); go("thanks"); };
+}
+
+/* ============================================================
+   HIDDEN ADMIN — daily sales totals, read live from the sheet.
+   Reach it by adding #admin to your site URL. Not linked anywhere.
+   ============================================================ */
+function parseSalesCSV(text) {
+  // Robust CSV parse handling quoted fields with commas.
+  const rows = [];
+  let row = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else field += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ",") { row.push(field); field = ""; }
+      else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+      else if (c === "\r") { /* skip */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function isToday(dateStr) {
+  // Google's auto timestamp looks like "6/4/2026 14:32:07" or ISO-ish.
+  const d = new Date(dateStr);
+  if (isNaN(d)) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() &&
+         d.getMonth() === now.getMonth() &&
+         d.getDate() === now.getDate();
+}
+
+function renderAdmin() {
+  app.innerHTML = `
+    <div class="screen" style="padding:1.5rem 1.25rem">
+      <div class="heading" style="margin-bottom:0.3rem">Daily Sales</div>
+      <div class="subhead" id="adminDate"></div>
+      <div id="adminBody"><div class="empty">Loading today's sales…</div></div>
+      <button class="done-btn" id="adminBack" style="margin-top:1.5rem">← Back to stand</button>
+    </div>`;
+  const d = new Date();
+  app.querySelector("#adminDate").textContent =
+    d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+  app.querySelector("#adminBack").onclick = () => { location.hash = ""; state.screen = "lang"; render(); };
+
+  if (!SALES_CSV_URL || SALES_CSV_URL.includes("REPLACE")) {
+    app.querySelector("#adminBody").innerHTML =
+      `<div style="background:#fff5e8;border:1px solid #e8c98a;border-radius:12px;padding:1rem;font-size:0.85rem;color:#8a6d1f">
+        Sales sheet not connected yet. Publish your Form's response sheet as CSV and paste the URL into SALES_CSV_URL near the top of the file.
+      </div>`;
+    return;
+  }
+
+  const url = SALES_CSV_URL + (SALES_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+  fetch(url)
+    .then(r => { if (!r.ok) throw new Error("status " + r.status); return r.text(); })
+    .then(text => {
+      const rows = parseSalesCSV(text);
+      if (rows.length < 2) { showAdmin({count:0,total:0,cash:0,card:0,cashN:0,cardN:0,tiers:{}}); return; }
+      const header = rows[0].map(h => h.trim().toLowerCase());
+      const iTime = 0; // Google's auto timestamp is always column A
+      const iTotal = header.findIndex(h => h.includes("total"));
+      const iPay   = header.findIndex(h => h.includes("payment"));
+      const iTier  = header.findIndex(h => h.includes("tier"));
+      let agg = { count:0, total:0, cash:0, card:0, cashN:0, cardN:0, tiers:{} };
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || !row[iTime]) continue;
+        if (!isToday(row[iTime])) continue;
+        const amt = parseFloat((row[iTotal]||"").replace(/[^0-9.]/g,"")) || 0;
+        const pay = (row[iPay]||"").trim().toLowerCase();
+        const tier = (row[iTier]||"").trim() || "Unknown";
+        agg.count++; agg.total += amt;
+        if (pay === "card") { agg.card += amt; agg.cardN++; }
+        else { agg.cash += amt; agg.cashN++; }
+        agg.tiers[tier] = (agg.tiers[tier] || 0) + amt;
+      }
+      showAdmin(agg);
+    })
+    .catch(err => {
+      app.querySelector("#adminBody").innerHTML =
+        `<div class="empty">Couldn't load sales (${err.message}). Check the published CSV URL.</div>`;
+    });
+}
+
+function showAdmin(a) {
+  const tierRows = Object.keys(a.tiers).length
+    ? Object.entries(a.tiers).map(([k,v]) =>
+        `<div class="citem"><div class="citem-left"><span class="citem-name">${k}</span></div><span class="citem-price">${fmt(v)}</span></div>`).join("")
+    : `<div class="empty">No sales yet today</div>`;
+  app.querySelector("#adminBody").innerHTML = `
+    <div class="total-box" style="margin-bottom:1rem">
+      <span class="total-word">Today's Total</span>
+      <span class="total-num">${fmt(a.total)}</span>
+    </div>
+    <div class="cart-items" style="margin-bottom:1rem">
+      <div class="citem"><div class="citem-left"><span class="citem-name">💵 Cash</span><span class="citem-meta">${a.cashN} sale${a.cashN===1?"":"s"}</span></div><span class="citem-price">${fmt(a.cash)}</span></div>
+      <div class="citem"><div class="citem-left"><span class="citem-name">💳 Card</span><span class="citem-meta">${a.cardN} sale${a.cardN===1?"":"s"}</span></div><span class="citem-price">${fmt(a.card)}</span></div>
+      <div class="citem"><div class="citem-left"><span class="citem-name">Total sales</span></div><span class="citem-price">${a.count}</span></div>
+    </div>
+    <div class="pay-label">By Price Tier</div>
+    <div class="cart-items">${tierRows}</div>`;
 }
 
 function renderThanks() {
@@ -600,7 +780,13 @@ function renderThanks() {
 }
 
 loadStock();
-render();
+// Hidden admin: visiting the site with #admin in the URL opens the sales dashboard.
+function checkHash() {
+  if (location.hash.toLowerCase() === "#admin") { state.screen = "admin"; render(); return true; }
+  return false;
+}
+window.addEventListener("hashchange", () => { if (!checkHash()) { state.screen = "lang"; render(); } });
+if (!checkHash()) render();
 </script>
 </body>
 </html>
